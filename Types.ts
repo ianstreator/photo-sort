@@ -1,10 +1,8 @@
-export type sizes = {
+export type UrlSizes = {
   thumb: string;
   full: string;
 };
-export type Unsplash = {
-  urls: sizes;
+export type UidUrls = {
+  [uid: string]: UrlSizes;
 };
-export type Urls = sizes[];
-
-export type UrlSizes = { index: { thumb: string; full: string } };
+export type UidUrlsArray = [UidUrls][];
