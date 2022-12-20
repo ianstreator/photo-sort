@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { useState, useEffect, useRef, FormEvent, useContext } from "react";
 import { IoMdPhotos } from "react-icons/io";
-
+import { SiRedis } from "react-icons/si";
 import { StateContext } from "../Context";
 import ImageCard from "../components/ImageCard";
 
@@ -68,7 +68,11 @@ export default function Home() {
 
           <div className="saved-container">
             <IoMdPhotos size={"4rem"} color={"hsl(220, 75%, 50%)"} />
-            <p className="saved-amount">{savedImagesArray?.length || 0}</p>
+            <p>{savedImagesArray?.length || 0}</p>
+          </div>
+          <div className="saved-container">
+            <SiRedis size={"4rem"} color={"hsl(20, 75%, 50%)"} />
+            <p>{savedImagesArray?.length || 0}</p>
           </div>
         </div>
 
