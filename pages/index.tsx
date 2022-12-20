@@ -1,22 +1,15 @@
 import Head from "next/head";
-import Image from "next/image";
 import { useState, useEffect, useRef, FormEvent, useContext } from "react";
-import { Urls, sizes } from "../Types";
 import { IoMdPhotos } from "react-icons/io";
 
 import { StateContext } from "../Context";
 import ImageCard from "../components/ImageCard";
 
-type UnsplashRes = {
-  urls: Urls;
-  message: string;
-};
+import { UidUrls, UrlSizes } from "../Types";
 
 export default function Home() {
-  const { savedImages } = useContext(StateContext);
-  const savedImagesArray = savedImages ? Object.values(savedImages) : null;
-
-  const [urls, setUrls] = useState<Urls>();
+  const { savedImages, savedImagesArray, urls, setUrls } =
+    useContext(StateContext);
 
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -28,26 +21,26 @@ export default function Home() {
     };
     const res = await fetch(`${window.location.pathname}api/unsplash`, options);
     if (res.status === 200) {
-      const urls = (await res.json()) as Urls;
-      return urls;
+      const urlsObject = (await res.json()) as UidUrls;
+      return { urlsObject };
     } else {
-      const { message } = (await res.json()) as UnsplashRes;
-      return window.alert(message);
+      const { message } = (await res.json()) as { message: string };
+      return { message };
     }
   };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (typeof searchRef.current?.value !== "string") return;
-    const unsplashUrls = await fetchUrls(searchRef.current.value!);
-    if (typeof unsplashUrls === "object") {
-      setUrls(unsplashUrls);
-    }
+
+    const query = searchRef.current?.value;
+    if (typeof query !== "string") return;
+
+    const { urlsObject, message } = await fetchUrls(query);
+    if (urlsObject) setUrls(urlsObject);
+    if (message) window.alert(message);
   };
 
-  useEffect(() => {
-    console.log(savedImages);
-  }, [urls]);
+  useEffect(() => {}, [urls]);
 
   return (
     <>
@@ -74,37 +67,40 @@ export default function Home() {
           </form>
 
           <div className="saved-container">
-            <IoMdPhotos
-              size={"4rem"}
-              color={"hsl(220, 75%, 50%)"}
-              className="saved-icon"
-            />
+            <IoMdPhotos size={"4rem"} color={"hsl(220, 75%, 50%)"} />
             <p className="saved-amount">{savedImagesArray?.length || 0}</p>
           </div>
         </div>
 
-        {urls?.length && (
-          <>
-            <h1>Select photos to save</h1>
-            <p> current search ( {searchRef.current?.value} )</p>
-            <div className="images">
-              {urls?.map(({ thumb, full }: sizes, i: number) => {
-                console.log(thumb, full);
-                return <ImageCard key={i} url={thumb} value={full} />;
-              })}
-            </div>
-          </>
-        )}
+        <h1>Select photos to save</h1>
+        <p> current search ( {searchRef.current?.value} )</p>
+        <div className="images">
+          {Object.entries(urls)?.map(
+            ([uid, { thumb, full }]: [string, UrlSizes], i) => {
+              const initSaveValue = savedImages[uid] ? true : false;
+              console.log(initSaveValue, "Index");
 
-        {savedImagesArray?.length && (
+              return (
+                <ImageCard
+                  key={i}
+                  urls={{ thumb, full }}
+                  uid={uid}
+                  isSaved={initSaveValue}
+                />
+              );
+            }
+          )}
+        </div>
+
+        {/* {savedImagesArray?.length && (
           <div className="saved-modal">
             <div className="images">
-              {savedImagesArray?.map(({ thumb, full }: sizes, i: number) => (
-                <ImageCard key={i} url={thumb} value={full} />
+              {savedImagesArray?.map((urls: sizes, i: number) => (
+                <ImageCard key={i} index={i} urls={urls} />
               ))}
             </div>
           </div>
-        )}
+        )} */}
       </main>
     </>
   );
