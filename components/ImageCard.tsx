@@ -4,49 +4,54 @@ import { useState, useContext } from "react";
 import { StateContext } from "../Context";
 import { UrlSizes } from "../Types";
 
-
-function ImageCard({ url, value }: { url: string; value: string }) {
-  const [hover, setHover] = useState(false);
-  const [saved, setSaved] = useState(false);
-  
-
-  const { savedImages, setSavedImages } = useContext(StateContext);
+function ImageCard({
+  urls: { thumb, full },
+  uid,
+  isSaved,
+}: {
+  urls: UrlSizes;
+  uid: string;
+  isSaved: Boolean;
+}) {
+  const { savedImages, setSavedImages, urls } = useContext(StateContext);
+  const [saved, setSaved] = useState<Boolean>();
 
   const addToSaved = () => {
-    setSaved(!saved);
+    setSaved(true);
 
-    // setSavedImages(curr => [...curr!, value]);
+    setSavedImages((curr) => ({
+      ...curr,
+      [uid]: { thumb, full },
+    }));
   };
 
-  useEffect(() => {
+  const removeFromSaved = () => {
     setSaved(false);
-  }, [url]);
-  return (
-    <div
-      className={`card ${saved && "saved"}`}
-      onMouseEnter={() => setHover(!hover)}
-      onMouseLeave={() => setHover(!hover)}
-      onClick={addToSaved}
-    >
-      {hover && (
-        <div className="hover-container">
-          <p className={saved ? "remove" : "save"}>
-            {saved ? "REMOVE" : "SAVE"}
-          </p>
-        </div>
-      )}
 
+    setSavedImages((curr) => {
+      const updatedSavedImages = { ...curr };
+      delete updatedSavedImages[uid];
+      return {
+        ...updatedSavedImages,
+      };
+    });
+  };
+  useEffect(() => {
+    setSaved(isSaved);
+  }, [urls]);
+
+  return (
+    <div className={`card ${saved && "saved"}`}>
       <div
-        className={`image-container  ${hover && "hover"} ${
-          saved && "saved-tag"
-        }`}
+        className="hover-text"
+        onClick={saved ? removeFromSaved : addToSaved}
       >
         <div className={`saved-container ${saved && "show"}`}>
-          <p className="saved">SAVED</p>
+          <div className="saved">saved</div>
         </div>
-
-        <Image src={url} width={175} height={175} alt="unsplash"></Image>
+        <p className={saved ? "remove" : "save"}>{saved ? "remove" : "save"}</p>
       </div>
+      <Image src={thumb} width={175} height={175} alt="unsplash"></Image>
     </div>
   );
 }
