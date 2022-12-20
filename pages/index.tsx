@@ -78,8 +78,6 @@ export default function Home() {
           {Object.entries(urls)?.map(
             ([uid, { thumb, full }]: [string, UrlSizes], i) => {
               const initSaveValue = savedImages[uid] ? true : false;
-              console.log(initSaveValue, "Index");
-
               return (
                 <ImageCard
                   key={i}
